@@ -37,6 +37,7 @@ class App extends Component {
         },
       ],
       term: "",
+      filter: "all",
     };
 
     this.maxId = this.state.data.length;
@@ -67,7 +68,6 @@ class App extends Component {
   };
 
   onToggleProp = (id, prop) => {
-    console.log(prop);
     this.setState(({ data }) => ({
       data: data.map((item) =>
         item.id === id ? { ...item, [prop]: !item[prop] } : item,
@@ -85,18 +85,36 @@ class App extends Component {
     });
   };
 
+  filterEmployees = (employees, filter) => {
+    switch (filter) {
+      case "like":
+        return employees.filter((item) => item.isLiked);
+      case "greaterThan1000":
+        return employees.filter((item) => item.salary > 1000);
+      default:
+        return employees;
+    }
+  };
+
   onUpdateSearch = (term) => {
     this.setState({ term });
   };
 
+  onFilterSelect = (filter) => {
+    this.setState({ filter });
+  };
+
   render() {
-    const { data, term } = this.state;
+    const { data, term, filter } = this.state;
 
     const employeesNumber = data.length;
     const increaseNumber = data.filter((item) => item.shouldIncrease).length;
     const likedNumber = data.filter((item) => item.isLiked).length;
 
-    const visibleEmployees = this.searchEmployee(data, term);
+    const visibleEmployees = this.filterEmployees(
+      this.searchEmployee(data, term),
+      filter,
+    );
 
     return (
       <div className="app">
@@ -108,7 +126,7 @@ class App extends Component {
 
         <div className="search-panel">
           <SearchPanel onUpdateSearch={this.onUpdateSearch} />
-          <AppFilter />
+          <AppFilter filter={filter} onFilterSelect={this.onFilterSelect} />
         </div>
 
         <EmployeesList
